@@ -92,8 +92,8 @@ model_options = {
 comparative_model_paths = {
     "CONVNEXT + FC": "model/Full convnext/compare model.pth",
     "CONVNEXT + TF": "model/Full convnext TF/compare model.pth",
-    "SWIN V2 + FC": "model/Full swin_b/compare model.pth",
-    "SWIN V2 + TF": "model/Full swin_b TF/compare model.pth"
+    "SWIN V2 + FC": "model/Full swin/compare model.pth",
+    "SWIN V2 + TF": "model/Full swin TF/compare model.pth"
 }
 
 # ---------- Step 1：模型选择 ----------
