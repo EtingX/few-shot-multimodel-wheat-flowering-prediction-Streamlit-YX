@@ -376,7 +376,7 @@ elif anchor_option == "Upload Your Own Anchors":
         image_count = len(glob.glob(os.path.join(image_folder, "*.jpg"))) + \
                       len(glob.glob(os.path.join(image_folder, "*.jpeg"))) + \
                       len(glob.glob(os.path.join(image_folder, "*.png")))
-        estimated_time_sec = image_count * 5
+        estimated_time_sec = image_count * 10
         estimated_minutes = estimated_time_sec / 60
 
         st.info(f"🖥️ Running on CPU | Total images: {image_count} | Estimated time: ~{estimated_minutes:.1f} minutes")
@@ -508,8 +508,8 @@ elif anchor_option == "Train Your Own Anchor":
         st.warning("⚠️ No day folders found in training data.")
     else:
         if st.button("🚀 Generate All Anchors"):
-            estimated_minutes = len(day_list) * 2
-            st.info(f"🕒 Estimated total generation time: ~{estimated_minutes} minutes for {len(day_list)} day(s).")
+            estimated_minutes = len(day_list) * 5
+            st.info(f"🕒 Estimated total generation time: ~{estimated_minutes} minutes for {len(day_list)} day(s). (Running on CPU)")
 
             from anchor_create import generate_full_anchor_from_dated_folders
 
