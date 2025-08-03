@@ -19,8 +19,11 @@ with col2:
         "<h4 style='text-align: center; color: grey;'>Empowering individual wheat phenotyping using weather-aware image analysis</h4>",
         unsafe_allow_html=True
     )
+    st.markdown("## 🌾 Predict wheat flowering like never before", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-weight: bold;'>One plant. One forecast. One step ahead.</div>", unsafe_allow_html=True)
 
 st.markdown("---")
+
 
 # ---------- 引用 ----------
 st.markdown(
@@ -273,30 +276,30 @@ if anchor_option == "Use Official Anchors":
     # 上传数据路径
     weather_excel = os.path.join(user_temp_folder, 'custom_weather', f"{required_date}.xlsx")
 
-    # 🔍 统计图像数量并估算时间（以每张图 21.34 秒为参考）
-    if os.path.exists(image_folder):
-        num_images = len([
-            f for f in os.listdir(image_folder)
-            if f.lower().endswith(('.jpg', '.jpeg', '.png'))
-        ])
-        seconds_per_image = 5
-        total_seconds = num_images * seconds_per_image
-        total_minutes = total_seconds / 60
-
-        st.markdown(
-            f"🕒 **Estimated time**: {num_images} images × {seconds_per_image:.1f} sec = "
-            f"~{total_minutes:.1f} minutes total (on CPU)"
-        )
-
-    # 🔘 添加运行按钮
+    # ▶️ Run prediction button
     if st.button("▶️ Run Prediction"):
-        predict_and_plot_anchor_votes(
-            image_folder=image_folder,
-            weather_excel=weather_excel,
-            model_ft=st.session_state.model_ft,
-            sim_model=st.session_state.sim_model,
-            anchor_dir=st.session_state.anchor_dir,
-        )
+        import glob
+
+        image_count = len(glob.glob(os.path.join(image_folder, "*.jpg"))) + \
+                      len(glob.glob(os.path.join(image_folder, "*.jpeg"))) + \
+                      len(glob.glob(os.path.join(image_folder, "*.png")))
+        seconds_per_image = 5  # You can adjust this based on actual timing
+        estimated_minutes = (image_count * seconds_per_image) / 60
+
+        st.info(f"🖥️ Running on CPU | Total images: {image_count} | Estimated time: ~{estimated_minutes:.1f} minutes")
+
+        with st.spinner("⏳ Predicting anthesis time... Please wait."):
+            predict_and_plot_anchor_votes(
+                image_folder=image_folder,
+                weather_excel=weather_excel,
+                model_ft=st.session_state.model_ft,
+                sim_model=st.session_state.sim_model,
+                anchor_dir=st.session_state.anchor_dir,
+            )
+
+        st.success("✅ Prediction complete! View results below.")
+
+
 
 
 # ---------- Option 2: 上传自定义 anchor ----------
@@ -373,21 +376,26 @@ elif anchor_option == "Upload Your Own Anchors":
     # 添加运行按钮
     if st.button("▶️ Run Prediction"):
         import glob
+
         image_count = len(glob.glob(os.path.join(image_folder, "*.jpg"))) + \
                       len(glob.glob(os.path.join(image_folder, "*.jpeg"))) + \
                       len(glob.glob(os.path.join(image_folder, "*.png")))
+
         estimated_time_sec = image_count * 10
         estimated_minutes = estimated_time_sec / 60
 
         st.info(f"🖥️ Running on CPU | Total images: {image_count} | Estimated time: ~{estimated_minutes:.1f} minutes")
 
-        predict_and_plot_anchor_votes(
-            image_folder=image_folder,
-            weather_excel=weather_excel,
-            model_ft=st.session_state.model_ft,
-            sim_model=st.session_state.sim_model,
-            anchor_dir=st.session_state.anchor_dir,
-        )
+        with st.spinner("⏳ Predicting anthesis time... Please wait."):
+            predict_and_plot_anchor_votes(
+                image_folder=image_folder,
+                weather_excel=weather_excel,
+                model_ft=st.session_state.model_ft,
+                sim_model=st.session_state.sim_model,
+                anchor_dir=st.session_state.anchor_dir,
+            )
+
+        st.success("✅ Prediction complete! View results below.")
 
 
 
