@@ -1,4 +1,4 @@
 # few-shot-multimodel-wheat-flowering-prediction-Streamlit-YX
-Client Dashboard: Multi-Modal Few-Shot Learning for Anthesis Prediction of Individual Wheat Plants /n
-https://few-shot-multimodel-wheat-flowering-prediction-app-yx-hk6s9twf.streamlit.app/
+Client Dashboard: Multi-Modal Few-Shot Learning for Anthesis Prediction of Individual Wheat Plants
+The link is https://few-shot-multimodel-wheat-flowering-prediction-app-yx-hk6s9twf.streamlit.app/
 This interactive dashboard enables users to explore and utilize a cutting-edge few-shot learning framework designed for predicting anthesis (flowering) in individual wheat plants. Leveraging both RGB images and weather data, the system integrates advanced feature extraction models (ConvNeXt, Swin V2) with comparison modules (Fully Connected or Transformer) to generate accurate, model-driven forecasts. Users can select pre-trained models, upload custom data, generate or manage anchor representations, and visualize prediction outcomes—all in one streamlined interface.
