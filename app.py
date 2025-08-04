@@ -12,17 +12,17 @@ st.set_page_config(
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown(
-        """
-        <h1 style='text-align: center;'>Multi-modal Few-shot Wheat Flowering Prediction</h1>
-        <h4 style='text-align: center; color: grey;'>Empowering individual wheat phenotyping using weather-aware image analysis</h4>
-        <h3 style='text-align: center;'>🌾 Predict wheat flowering like never before</h3>
-        <div style='text-align: center; font-weight: bold;'>One plant. One forecast. One step ahead.</div>
-        """,
+        "<h1 style='text-align: center;'>Multi-modal Few-shot Wheat Flowering Prediction</h1>",
         unsafe_allow_html=True
     )
+    st.markdown(
+        "<h4 style='text-align: center; color: grey;'>Empowering individual wheat phenotyping using weather-aware image analysis</h4>",
+        unsafe_allow_html=True
+    )
+    st.markdown("## 🌾 Predict wheat flowering like never before", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-weight: bold;'>One plant. One forecast. One step ahead.</div>", unsafe_allow_html=True)
 
 st.markdown("---")
-
 
 
 # ---------- 引用 ----------
@@ -173,15 +173,15 @@ if "model_display_name" in st.session_state:
 # ---------- Step 2：客户上传 ----------
 st.header("2️⃣ Upload Image and Weather Data")
 st.image("Figure 1.png", width=700)
-st.markdown(
-    """
-    <a href="demo.zip" download>
-        <button style='font-size:16px; padding:8px 16px; border-radius:6px; background-color:#4CAF50; color:white; border:none;'>
-            ⬇️ Download Demo ZIP
-        </button>
-    </a>
-    """,
-    unsafe_allow_html=True
+# 添加下载按钮
+with open("demo.zip", "rb") as f:
+    zip_bytes = f.read()
+
+st.download_button(
+    label="⬇️ Download Demo ZIP File",
+    data=zip_bytes,
+    file_name="demo.zip",
+    mime="application/zip"
 )
 
 # 日期输入
