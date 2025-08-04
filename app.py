@@ -173,6 +173,16 @@ if "model_display_name" in st.session_state:
 # ---------- Step 2：客户上传 ----------
 st.header("2️⃣ Upload Image and Weather Data")
 st.image("Figure 1.png", width=700)
+st.markdown(
+    """
+    <a href="demo.zip" download>
+        <button style='font-size:16px; padding:8px 16px; border-radius:6px; background-color:#4CAF50; color:white; border:none;'>
+            ⬇️ Download Demo ZIP
+        </button>
+    </a>
+    """,
+    unsafe_allow_html=True
+)
 
 # 日期输入
 required_date = st.text_input("Enter the imaging date for prediction (format: YYYY-MM-DD)", value="2023-07-10")
