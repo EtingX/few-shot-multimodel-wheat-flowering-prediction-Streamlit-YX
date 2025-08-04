@@ -12,17 +12,17 @@ st.set_page_config(
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown(
-        "<h1 style='text-align: center;'>Multi-modal Few-shot Wheat Flowering Prediction</h1>",
+        """
+        <h1 style='text-align: center;'>Multi-modal Few-shot Wheat Flowering Prediction</h1>
+        <h4 style='text-align: center; color: grey;'>Empowering individual wheat phenotyping using weather-aware image analysis</h4>
+        <h3 style='text-align: center;'>🌾 Predict wheat flowering like never before</h3>
+        <div style='text-align: center; font-weight: bold;'>One plant. One forecast. One step ahead.</div>
+        """,
         unsafe_allow_html=True
     )
-    st.markdown(
-        "<h4 style='text-align: center; color: grey;'>Empowering individual wheat phenotyping using weather-aware image analysis</h4>",
-        unsafe_allow_html=True
-    )
-    st.markdown("## 🌾 Predict wheat flowering like never before", unsafe_allow_html=True)
-    st.markdown("<div style='text-align: center; font-weight: bold;'>One plant. One forecast. One step ahead.</div>", unsafe_allow_html=True)
 
 st.markdown("---")
+
 
 
 # ---------- 引用 ----------
