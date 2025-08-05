@@ -229,7 +229,9 @@ if uploaded_images and uploaded_weather and required_date:
     # 如果点击了 Crop 按钮，执行 YOLOv10 裁剪逻辑
     if do_crop:
         with st.spinner("🔍 Running YOLOv10 detection and cropping..."):
-            model = YOLOv10("detection_weight/weights/best.pt")
+            model = YOLOv10()
+            model.load_state_dict(torch.load("detection_weight/best_weights.pth", map_location="cpu"))
+            model.eval()
             crop_count = 0
 
             for fname in os.listdir(temp_raw_folder):
