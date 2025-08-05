@@ -365,11 +365,6 @@ if uploaded_images and uploaded_weather and required_date:
             with open(img_save_path, "wb") as f:
                 f.write(img_file.read())
 
-    # 2. 加载 YOLOv10 模型并对上传图像进行预测（可选）
-    model = YOLOv10("detection_weight/weights/best.pt")
-    for img in os.listdir(image_folder):
-        model.predict(os.path.join(image_folder, img))
-
     # 3. 保存天气文件并按日期重命名
     weather_save_path = os.path.join(weather_folder, f"{required_date}.xlsx")
     with open(weather_save_path, "wb") as f:
