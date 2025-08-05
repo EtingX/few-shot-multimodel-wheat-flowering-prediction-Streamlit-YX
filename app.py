@@ -172,12 +172,15 @@ if "model_display_name" in st.session_state:
     st.markdown(f"📌 **Current model in use**: `{st.session_state.model_display_name}`")
 
 # ---------- Step 2：客户上传 ----------
+from ultralytics import YOLOv10
+
+# 标题和示意图
 st.header("2️⃣ Upload Image and Weather Data")
 st.image("Figure 1.png", width=700)
-# 添加下载按钮
+
+# 下载 Demo ZIP 文件
 with open("demo.zip", "rb") as f:
     zip_bytes = f.read()
-
 st.download_button(
     label="⬇️ Download Demo ZIP File",
     data=zip_bytes,
@@ -188,56 +191,110 @@ st.download_button(
 # 日期输入
 required_date = st.text_input("Enter the imaging date for prediction (format: YYYY-MM-DD)", value="2023-07-10")
 
-# 图像上传（单图、多图或 ZIP）
+# 上传区域
 uploaded_images = st.file_uploader("Upload image(s) or a ZIP file", type=["jpg", "jpeg", "png", "zip"], accept_multiple_files=True)
-
-# weather 上传（单个 Excel 文件）
 uploaded_weather = st.file_uploader("Upload corresponding weather Excel (.xlsx)", type=["xlsx"])
 
-# 创建目标路径
+# 用户文件夹路径
+user_temp_folder = "__temp__folder"
 image_folder = os.path.join(user_temp_folder, 'custom_image')
+temp_raw_folder = os.path.join(user_temp_folder, 'temp_raw_image')
 weather_folder = os.path.join(user_temp_folder, 'custom_weather')
 
-# 如果存在旧文件夹，则先删除
-if os.path.exists(image_folder):
-    shutil.rmtree(image_folder)
-if os.path.exists(weather_folder):
-    shutil.rmtree(weather_folder)
+# 清理并创建三个文件夹
+for folder in [image_folder, temp_raw_folder, weather_folder]:
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    os.makedirs(folder, exist_ok=True)
 
-# 重新创建干净的文件夹
-os.makedirs(image_folder, exist_ok=True)
-os.makedirs(weather_folder, exist_ok=True)
+# Crop 按钮（默认未点击）
+do_crop = st.button("✂️ Crop with YOLOv10 if your images are whole pictures")
 
-# 上传处理逻辑
+# 核心上传逻辑
 if uploaded_images and uploaded_weather and required_date:
-    # 1. 处理图像上传（可能是 zip 或多张图片）
+    # 图像上传 → 保存到 temp_raw_image
     for img_file in uploaded_images:
         if img_file.name.endswith(".zip"):
-            # 保存 zip 临时路径
-            zip_path = os.path.join('__temp__folder', img_file.name)
+            zip_path = os.path.join(user_temp_folder, img_file.name)
             with open(zip_path, "wb") as f:
                 f.write(img_file.read())
-            # 解压到 custom_image
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(image_folder)
-            os.remove(zip_path)  # 清理 zip
+                zip_ref.extractall(temp_raw_folder)
+            os.remove(zip_path)
         else:
-            # 直接保存图片文件
-            img_save_path = os.path.join(image_folder, img_file.name)
+            img_save_path = os.path.join(temp_raw_folder, img_file.name)
             with open(img_save_path, "wb") as f:
                 f.write(img_file.read())
 
-    # 2. 处理 weather 上传并重命名
+    # 如果点击了 Crop 按钮，执行 YOLOv10 裁剪逻辑
+    if do_crop:
+        with st.spinner("🔍 Running YOLOv10 detection and cropping..."):
+            model = YOLOv10("detection_weight/weights/best.pt")
+            crop_count = 0
+
+            for fname in os.listdir(temp_raw_folder):
+                img_path = os.path.join(temp_raw_folder, fname)
+                try:
+                    img = Image.open(img_path).convert("RGB")
+                    img_array = np.array(img)
+                except:
+                    continue
+
+                results = model.predict(img_array, verbose=False)
+
+                for r in results:
+                    for i, box in enumerate(r.boxes.xyxy):
+                        x1, y1, x2, y2 = map(int, box)
+                        if x2 - x1 < 5 or y2 - y1 < 5:
+                            continue
+                        crop = img_array[y1:y2, x1:x2]
+                        if crop.size == 0:
+                            continue
+                        crop_img = Image.fromarray(crop)
+                        save_path = os.path.join(image_folder, f"{os.path.splitext(fname)[0]}_crop{i}.jpg")
+                        crop_img.save(save_path)
+                        crop_count += 1
+
+        st.success(f"🟢 Cropping complete. {crop_count} cropped image(s) saved.")
+
+        # 打包 ZIP 文件
+        zip_output_path = os.path.join(user_temp_folder, "cropped_images.zip")
+        with zipfile.ZipFile(zip_output_path, 'w') as zipf:
+            for fname in os.listdir(image_folder):
+                fpath = os.path.join(image_folder, fname)
+                zipf.write(fpath, arcname=fname)
+
+        # 下载按钮
+        with open(zip_output_path, "rb") as f:
+            zip_bytes = f.read()
+
+        st.markdown("### 📦 Download Your Cropped Results")
+        st.download_button(
+            label="⬇️ Download Cropped Images (ZIP)",
+            data=zip_bytes,
+            file_name="cropped_images.zip",
+            mime="application/zip"
+        )
+
+    else:
+        # 没点击 crop，直接复制用户上传的图像到 custom_image
+        for fname in os.listdir(temp_raw_folder):
+            src = os.path.join(temp_raw_folder, fname)
+            dst = os.path.join(image_folder, fname)
+            shutil.copy(src, dst)
+        st.info("🟢 Using uploaded images as pre-cropped. No detection applied.")
+
+    # 保存 weather 文件
     weather_save_path = os.path.join(weather_folder, f"{required_date}.xlsx")
     with open(weather_save_path, "wb") as f:
         f.write(uploaded_weather.read())
 
-    st.success(f"✅ All files successfully uploaded and saved.`.\nWeather file renamed to `{required_date}.xlsx`.")
+    st.success(f"✅ Weather file saved as `{required_date}.xlsx`.")
 
 else:
-    st.warning("Please upload both image(s) and a weather Excel file, and enter a valid date.")
+    st.warning("⚠️ Please upload both image(s) and a weather Excel file, and enter a valid date.")
 
-
+# ---------- Step 3：Anchor ----------
 st.markdown("---")
 st.header("3️⃣ Choose Anchor Strategy")
 
