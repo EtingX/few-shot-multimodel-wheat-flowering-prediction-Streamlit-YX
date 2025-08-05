@@ -172,7 +172,7 @@ if "model_display_name" in st.session_state:
     st.markdown(f"📌 **Current model in use**: `{st.session_state.model_display_name}`")
 
 # ---------- Step 2：客户上传 ----------
-from ultralytics import YOLOv10
+from ultralytics_YX import YOLOv10
 
 # 标题和示意图
 st.header("2️⃣ Upload Image and Weather Data")
