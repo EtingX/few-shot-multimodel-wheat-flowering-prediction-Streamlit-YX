@@ -172,7 +172,7 @@ if "model_display_name" in st.session_state:
     st.markdown(f"📌 **Current model in use**: `{st.session_state.model_display_name}`")
 
 # ---------- Step 2：客户上传 ----------
-from ultralytics import YOLO
+from ultralytics import YOLOv10
 
 # 标题和示意图
 st.header("2️⃣ Upload Image and Weather Data")
@@ -229,7 +229,7 @@ if uploaded_images and uploaded_weather and required_date:
     # 如果点击了 Crop 按钮，执行 YOLOv10 裁剪逻辑
     if do_crop:
         with st.spinner("🔍 Running YOLOv10 detection and cropping..."):
-            model = YOLO("detection_weight/weights/best.pt")
+            model = YOLOv10("detection_weight/weights/best.pt")
             crop_count = 0
 
             for fname in os.listdir(temp_raw_folder):
