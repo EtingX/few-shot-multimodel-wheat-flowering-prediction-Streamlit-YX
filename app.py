@@ -145,9 +145,6 @@ st.info(model_description)
 #     model_ft.load_state_dict(torch.load(local_model_path, map_location=device))
 #     model_ft.to(device)
 #     model_ft.eval()
-from huggingface_hub import hf_hub_download
-import os, torch, streamlit as st
-
 if st.button("🚀 Load Selected Model"):
     selected_model_code, _ = model_options[model_name_display]
     hf_model_files = {
@@ -160,14 +157,35 @@ if st.button("🚀 Load Selected Model"):
     repo_id = "Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants"
     filename = hf_model_files[selected_model_code]
 
-    # 如果仓库是私有的，设置环境变量 HF_TOKEN，或把 token 传参
-    local_model_path = hf_hub_download(
-        repo_id=repo_id,
-        filename=filename,
-        local_dir="__temp__folder",
-        local_dir_use_symlinks=False,
-        token=os.getenv("HF_TOKEN", None),
-    )
+    # ✅ 用 resolve，而不是 tree
+    model_url = f"https://huggingface.co/{repo_id}/resolve/main/{filename}?download=true"
+    local_model_path = os.path.join("__temp__folder", filename)
+    os.makedirs("__temp__folder", exist_ok=True)
+
+    if not os.path.exists(local_model_path):
+        headers = {}
+        if os.getenv("HF_TOKEN"):  # 私有库或限流时
+            headers["Authorization"] = f"Bearer {os.getenv('HF_TOKEN')}"
+
+        with st.spinner("⏳ Downloading feature model from Hugging Face..."):
+            try:
+                with requests.get(model_url, headers=headers, stream=True, timeout=120) as r:
+                    r.raise_for_status()
+                    with open(local_model_path, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+            except requests.HTTPError as e:
+                st.error(f"HTTP {e.response.status_code} when downloading {filename}")
+                st.text(e.response.text[:800])
+                st.stop()
+
+        # 防止误下到 LFS 指针文本
+        with open(local_model_path, "rb") as f:
+            head = f.read(200)
+        if b"git-lfs" in head:
+            st.error("Downloaded an LFS pointer file. Use the /resolve URL or hf_hub_download.")
+            st.stop()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
