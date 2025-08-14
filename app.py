@@ -113,32 +113,62 @@ _, model_description = model_options[model_name_display]
 st.info(model_description)
 
 # ---------- 模型加载按钮 ----------
+# if st.button("🚀 Load Selected Model"):
+#     selected_model_code, _ = model_options[model_name_display]
+#     comparative_model_path = comparative_model_paths[model_name_display]
+
+#     # Hugging Face 模型链接
+#     hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/tree/main"
+#     hf_model_files = {
+#         "convnext": "convnext.pth",
+#         "convnext_tf": "convnext_tf.pth",
+#         "swin_b": "swin_b.pth",
+#         "swin_b_tf": "swin_b_tf.pth"
+#     }
+
+#     model_url = f"{hf_base_url}/{hf_model_files[selected_model_code]}"
+#     local_model_path = os.path.join("__temp__folder", hf_model_files[selected_model_code])
+#     os.makedirs("__temp__folder", exist_ok=True)
+
+#     # 下载模型（若本地无缓存）
+#     if not os.path.exists(local_model_path):
+#         with st.spinner("⏳ Downloading feature model from Hugging Face (approx. 5 minutes)..."):
+#             response = requests.get(model_url)
+#             response.raise_for_status()
+#             with open(local_model_path, "wb") as f:
+#                 f.write(response.content)
+
+#     # 加载 feature 模型
+#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
+#     model_ft = FeatureExtractNetwork(model_name=model_name)
+#     model_ft.load_state_dict(torch.load(local_model_path, map_location=device))
+#     model_ft.to(device)
+#     model_ft.eval()
+from huggingface_hub import hf_hub_download
+import os, torch, streamlit as st
+
 if st.button("🚀 Load Selected Model"):
     selected_model_code, _ = model_options[model_name_display]
-    comparative_model_path = comparative_model_paths[model_name_display]
-
-    # Hugging Face 模型链接
-    hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/tree/main"
     hf_model_files = {
         "convnext": "convnext.pth",
         "convnext_tf": "convnext_tf.pth",
         "swin_b": "swin_b.pth",
-        "swin_b_tf": "swin_b_tf.pth"
+        "swin_b_tf": "swin_b_tf.pth",
     }
 
-    model_url = f"{hf_base_url}/{hf_model_files[selected_model_code]}"
-    local_model_path = os.path.join("__temp__folder", hf_model_files[selected_model_code])
-    os.makedirs("__temp__folder", exist_ok=True)
+    repo_id = "Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants"
+    filename = hf_model_files[selected_model_code]
 
-    # 下载模型（若本地无缓存）
-    if not os.path.exists(local_model_path):
-        with st.spinner("⏳ Downloading feature model from Hugging Face (approx. 5 minutes)..."):
-            response = requests.get(model_url)
-            response.raise_for_status()
-            with open(local_model_path, "wb") as f:
-                f.write(response.content)
+    # 如果仓库是私有的，设置环境变量 HF_TOKEN，或把 token 传参
+    local_model_path = hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        local_dir="__temp__folder",
+        local_dir_use_symlinks=False,
+        token=os.getenv("HF_TOKEN", None),
+    )
 
-    # 加载 feature 模型
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
     model_ft = FeatureExtractNetwork(model_name=model_name)
