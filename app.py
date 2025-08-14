@@ -118,7 +118,7 @@ if st.button("🚀 Load Selected Model"):
     comparative_model_path = comparative_model_paths[model_name_display]
 
     # Hugging Face 模型链接
-    hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/resolve/main"
+    hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/tree/main"
     hf_model_files = {
         "convnext": "convnext.pth",
         "convnext_tf": "convnext_tf.pth",
