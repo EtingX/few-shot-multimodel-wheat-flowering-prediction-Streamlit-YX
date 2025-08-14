@@ -146,6 +146,7 @@ st.info(model_description)
 #     model_ft.to(device)
 #     model_ft.eval()
 if st.button("🚀 Load Selected Model"):
+    comparative_model_path = comparative_model_paths[model_name_display]
     selected_model_code, _ = model_options[model_name_display]
     hf_model_files = {
         "convnext": "convnext.pth",
