@@ -113,87 +113,87 @@ _, model_description = model_options[model_name_display]
 st.info(model_description)
 
 # ---------- 模型加载按钮 ----------
-# if st.button("🚀 Load Selected Model"):
-#     selected_model_code, _ = model_options[model_name_display]
-#     comparative_model_path = comparative_model_paths[model_name_display]
-
-#     # Hugging Face 模型链接
-#     hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/tree/main"
-#     hf_model_files = {
-#         "convnext": "convnext.pth",
-#         "convnext_tf": "convnext_tf.pth",
-#         "swin_b": "swin_b.pth",
-#         "swin_b_tf": "swin_b_tf.pth"
-#     }
-
-#     model_url = f"{hf_base_url}/{hf_model_files[selected_model_code]}"
-#     local_model_path = os.path.join("__temp__folder", hf_model_files[selected_model_code])
-#     os.makedirs("__temp__folder", exist_ok=True)
-
-#     # 下载模型（若本地无缓存）
-#     if not os.path.exists(local_model_path):
-#         with st.spinner("⏳ Downloading feature model from Hugging Face (approx. 5 minutes)..."):
-#             response = requests.get(model_url)
-#             response.raise_for_status()
-#             with open(local_model_path, "wb") as f:
-#                 f.write(response.content)
-
-#     # 加载 feature 模型
-#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
-#     model_ft = FeatureExtractNetwork(model_name=model_name)
-#     model_ft.load_state_dict(torch.load(local_model_path, map_location=device))
-#     model_ft.to(device)
-#     model_ft.eval()
 if st.button("🚀 Load Selected Model"):
-    comparative_model_path = comparative_model_paths[model_name_display]
     selected_model_code, _ = model_options[model_name_display]
+    comparative_model_path = comparative_model_paths[model_name_display]
+
+    # Hugging Face 模型链接
+    hf_base_url = "https://huggingface.co/Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants/tree/main"
     hf_model_files = {
         "convnext": "convnext.pth",
         "convnext_tf": "convnext_tf.pth",
         "swin_b": "swin_b.pth",
-        "swin_b_tf": "swin_b_tf.pth",
+        "swin_b_tf": "swin_b_tf.pth"
     }
 
-    repo_id = "Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants"
-    filename = hf_model_files[selected_model_code]
-
-    # ✅ 用 resolve，而不是 tree
-    model_url = f"https://huggingface.co/{repo_id}/resolve/main/{filename}?download=true"
-    local_model_path = os.path.join("__temp__folder", filename)
+    model_url = f"{hf_base_url}/{hf_model_files[selected_model_code]}"
+    local_model_path = os.path.join("__temp__folder", hf_model_files[selected_model_code])
     os.makedirs("__temp__folder", exist_ok=True)
 
+    # 下载模型（若本地无缓存）
     if not os.path.exists(local_model_path):
-        headers = {}
-        if os.getenv("HF_TOKEN"):  # 私有库或限流时
-            headers["Authorization"] = f"Bearer {os.getenv('HF_TOKEN')}"
+        with st.spinner("⏳ Downloading feature model from Hugging Face (approx. 5 minutes)..."):
+            response = requests.get(model_url)
+            response.raise_for_status()
+            with open(local_model_path, "wb") as f:
+                f.write(response.content)
 
-        with st.spinner("⏳ Downloading feature model from Hugging Face..."):
-            try:
-                with requests.get(model_url, headers=headers, stream=True, timeout=120) as r:
-                    r.raise_for_status()
-                    with open(local_model_path, "wb") as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            if chunk:
-                                f.write(chunk)
-            except requests.HTTPError as e:
-                st.error(f"HTTP {e.response.status_code} when downloading {filename}")
-                st.text(e.response.text[:800])
-                st.stop()
-
-        # 防止误下到 LFS 指针文本
-        with open(local_model_path, "rb") as f:
-            head = f.read(200)
-        if b"git-lfs" in head:
-            st.error("Downloaded an LFS pointer file. Use the /resolve URL or hf_hub_download.")
-            st.stop()
-
+    # 加载 feature 模型
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
     model_ft = FeatureExtractNetwork(model_name=model_name)
     model_ft.load_state_dict(torch.load(local_model_path, map_location=device))
     model_ft.to(device)
     model_ft.eval()
+# if st.button("🚀 Load Selected Model"):
+#     comparative_model_path = comparative_model_paths[model_name_display]
+#     selected_model_code, _ = model_options[model_name_display]
+#     hf_model_files = {
+#         "convnext": "convnext.pth",
+#         "convnext_tf": "convnext_tf.pth",
+#         "swin_b": "swin_b.pth",
+#         "swin_b_tf": "swin_b_tf.pth",
+#     }
+#
+#     repo_id = "Eting0308/Model_Multi-Modal_Few-Shot_Learning_for_Anthesis_Prediction_of_Individual_Wheat_Plants"
+#     filename = hf_model_files[selected_model_code]
+#
+#     # ✅ 用 resolve，而不是 tree
+#     model_url = f"https://huggingface.co/{repo_id}/resolve/main/{filename}?download=true"
+#     local_model_path = os.path.join("__temp__folder", filename)
+#     os.makedirs("__temp__folder", exist_ok=True)
+#
+#     if not os.path.exists(local_model_path):
+#         headers = {}
+#         if os.getenv("HF_TOKEN"):  # 私有库或限流时
+#             headers["Authorization"] = f"Bearer {os.getenv('HF_TOKEN')}"
+#
+#         with st.spinner("⏳ Downloading feature model from Hugging Face..."):
+#             try:
+#                 with requests.get(model_url, headers=headers, stream=True, timeout=120) as r:
+#                     r.raise_for_status()
+#                     with open(local_model_path, "wb") as f:
+#                         for chunk in r.iter_content(chunk_size=8192):
+#                             if chunk:
+#                                 f.write(chunk)
+#             except requests.HTTPError as e:
+#                 st.error(f"HTTP {e.response.status_code} when downloading {filename}")
+#                 st.text(e.response.text[:800])
+#                 st.stop()
+#
+#         # 防止误下到 LFS 指针文本
+#         with open(local_model_path, "rb") as f:
+#             head = f.read(200)
+#         if b"git-lfs" in head:
+#             st.error("Downloaded an LFS pointer file. Use the /resolve URL or hf_hub_download.")
+#             st.stop()
+#
+#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#     model_name = "convnext" if "convnext" in selected_model_code else "swin_b"
+#     model_ft = FeatureExtractNetwork(model_name=model_name)
+#     model_ft.load_state_dict(torch.load(local_model_path, map_location=device))
+#     model_ft.to(device)
+#     model_ft.eval()
 
     # 加载本地对比模型
     if "tf" in comparative_model_path.lower():
@@ -382,7 +382,6 @@ uploaded_weather = st.file_uploader(
 )
 
 # 文件夹路径
-user_temp_folder = "__temp__folder"
 image_folder = os.path.join(user_temp_folder, 'custom_image')
 weather_folder = os.path.join(user_temp_folder, 'custom_weather')
 
@@ -782,6 +781,3 @@ elif anchor_option == "Train Your Own Anchor":
             sim_model=st.session_state.sim_model,
             anchor_dir=os.path.join(user_temp_folder, "custom_train_anchor","anchor"),
         )
-
-
-
